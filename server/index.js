@@ -160,15 +160,11 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
   app.use(express.static(path.join(__dirname, '../client/dist')));
 
   // Handle React routing, return all requests to React app
-  app.get([
-    '/',
-    '/index.html',
-    '/static/*',
-    '/assets/*',
-    '/*'
-  ], (req, res) => {
+  // The "catch-all" handler: for any request that doesn't match above, send back React's index.html file.
+  app.get('*', (req, res) => {
     const filePath = path.join(__dirname, '../client/dist', 'index.html');
-    if (fs.existsSync(filePath)) {
+    // Check if file exists to avoid crashing if build is missing
+    if (require('fs').existsSync(filePath)) {
       res.sendFile(filePath);
     } else {
       res.status(404).send('Frontend build not found. Did you run npm run build?');
