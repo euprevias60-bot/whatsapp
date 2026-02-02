@@ -160,8 +160,8 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
   app.use(express.static(path.join(__dirname, '../client/dist')));
 
   // Handle React routing, return all requests to React app
-  // The "catch-all" handler: for any request that doesn't match above, send back React's index.html file.
-  app.get('*', (req, res) => {
+  // Using Regex to bypass Express 5/path-to-regexp strictness
+  app.get(/(.*)/, (req, res) => {
     const filePath = path.join(__dirname, '../client/dist', 'index.html');
     // Check if file exists to avoid crashing if build is missing
     if (require('fs').existsSync(filePath)) {
