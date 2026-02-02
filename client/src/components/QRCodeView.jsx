@@ -66,7 +66,13 @@ function QRCodeView({ socket, userId }) {
             </div>
 
             <div className="qr-section">
-                {status === 'connected' || status === 'authenticated' ? (
+                {status === 'loading' ? (
+                    <div className="loading-qr card">
+                        <Loader2 className="spin" size={48} />
+                        <h3>Iniciando WhatsApp...</h3>
+                        <p>Isso pode levar até 30 segundos na nuvem.</p>
+                    </div>
+                ) : status === 'connected' || status === 'authenticated' ? (
                     <div className="success-state">
                         <div className="icon-circle success">
                             <Smartphone size={48} />

@@ -47,10 +47,12 @@ async function getOrCreateSession(userId, io) {
   const session = {
     client,
     aiAgent,
-    status: 'disconnected',
+    status: 'loading',
     qr: null,
     humanInteractions: new Map()
   };
+
+  io.to(userId).emit('status', 'loading');
 
   const INACTIVITY_TIMEOUT = 5 * 60 * 1000;
 

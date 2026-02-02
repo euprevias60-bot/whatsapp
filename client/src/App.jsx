@@ -8,7 +8,8 @@ import './index.css';
 import { LayoutDashboard, Settings, LogOut, MessageSquare, User } from 'lucide-react';
 
 // Connect to socket
-const socket = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:3001');
+// Connect to socket - automatically detects if it should use localhost or the production URL
+const socket = io(window.location.hostname === 'localhost' ? 'http://localhost:3001' : window.location.origin);
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
