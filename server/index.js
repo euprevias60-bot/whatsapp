@@ -160,8 +160,19 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
   app.use(express.static(path.join(__dirname, '../client/dist')));
 
   // Handle React routing, return all requests to React app
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+  app.get([
+    '/',
+    '/index.html',
+    '/static/*',
+    '/assets/*',
+    '/*'
+  ], (req, res) => {
+    const filePath = path.join(__dirname, '../client/dist', 'index.html');
+    if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+    } else {
+      res.status(404).send('Frontend build not found. Did you run npm run build?');
+    }
   });
 } else {
   app.get('/', (req, res) => {
