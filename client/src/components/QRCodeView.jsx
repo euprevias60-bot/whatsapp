@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Smartphone, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Smartphone, CheckCircle, AlertCircle, Loader2, LogOut } from 'lucide-react';
 
-function QRCodeView({ socket }) {
+function QRCodeView({ socket, userId }) {
     const [qrCode, setQrCode] = useState('');
     const [status, setStatus] = useState('disconnected'); // disconnected, connected, authenticated
 
     useEffect(() => {
-        // Request status on mount
-        socket.emit('requestStatus');
+        if (!userId) return;
+
+        // Request status on mount for this specific user
+        socket.emit('requestStatus', userId);
 
         socket.on('qr', (data) => {
             setQrCode(data);
@@ -26,23 +28,39 @@ function QRCodeView({ socket }) {
             socket.off('qr');
             socket.off('status');
         };
-    }, [socket]);
+    }, [socket, userId]);
+
+    const handleWhatsAppLogout = () => {
+        if (window.confirm("Deseja realmente desconectar o WhatsApp desta conta?")) {
+            socket.emit('logout_whatsapp', userId);
+        }
+    };
 
     return (
         <div className="dashboard-view">
             <header className="page-header">
                 <h2>Dashboard</h2>
-                <p>Manage your WhatsApp connection</p>
+                <p>Gerencie sua conexão com o WhatsApp</p>
             </header>
 
             <div className="status-cards">
                 <div className="card status-card">
-                    <h3>Connection Status</h3>
-                    <div className={`status-badge ${status}`}>
-                        {status === 'disconnected' && <AlertCircle size={16} />}
-                        {status === 'connected' && <CheckCircle size={16} />}
-                        {status === 'authenticated' && <CheckCircle size={16} />}
-                        <span>{status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                    <div className="flex-between">
+                        <div>
+                            <h3>Status da Conexão</h3>
+                            <div className={`status-badge ${status}`}>
+                                {status === 'disconnected' && <AlertCircle size={16} />}
+                                {status === 'connected' && <CheckCircle size={16} />}
+                                {status === 'authenticated' && <CheckCircle size={16} />}
+                                <span>{status === 'authenticated' ? 'Autenticado' : status === 'connected' ? 'Pronto' : 'Desconectado'}</span>
+                            </div>
+                        </div>
+                        {(status === 'connected' || status === 'authenticated') && (
+                            <button className="secondary-btn logout-wa" onClick={handleWhatsAppLogout}>
+                                <LogOut size={16} />
+                                Desconectar WhatsApp
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -50,24 +68,27 @@ function QRCodeView({ socket }) {
             <div className="qr-section">
                 {status === 'connected' || status === 'authenticated' ? (
                     <div className="success-state">
-                        <div className="icon-circle">
+                        <div className="icon-circle success">
                             <Smartphone size={48} />
                         </div>
-                        <h3>WhatsApp Connected</h3>
-                        <p>Your AI agent is active and listening to messages.</p>
+                        <h3>WhatsApp Conectado!</h3>
+                        <p>Seu agente de IA está ativo e respondendo mensagens automaticamente.</p>
                     </div>
                 ) : (
-                    <div className="qr-container">
-                        <h3>Scan QR Code</h3>
-                        <p>Open WhatsApp on your phone &gt; Linked Devices &gt; Link a Device</p>
-                        {qrCode ? (
-                            <img src={qrCode} alt="WhatsApp QR Code" className="qr-image" />
-                        ) : (
-                            <div className="loading-qr">
-                                <Loader2 className="spin" size={32} />
-                                <p>Waiting for QR Code...</p>
-                            </div>
-                        )}
+                    <div className="qr-container card">
+                        <h3>Vincular Novo Dispositivo</h3>
+                        <p className="instruction">1. Abra o WhatsApp no seu celular<br />2. Toque em Apresentações ou Configurações e selecione Aparelhos Conectados<br />3. Toque em Conectar um Aparelho e aponte para esta tela.</p>
+
+                        <div className="qr-display">
+                            {qrCode ? (
+                                <img src={qrCode} alt="WhatsApp QR Code" className="qr-image" />
+                            ) : (
+                                <div className="loading-qr">
+                                    <Loader2 className="spin" size={32} />
+                                    <p>Gerando código QR...</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

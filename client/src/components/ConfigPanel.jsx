@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Save } from 'lucide-react';
+import { Save, Sparkles } from 'lucide-react';
 
-function ConfigPanel({ socket }) {
+function ConfigPanel({ socket, userId }) {
     const [instruction, setInstruction] = useState('');
     const [saved, setSaved] = useState(false);
 
     useEffect(() => {
-        // Request current config on mount
+        if (!userId) return;
+
+        // Current config is sent by the server upon joining
         socket.on('config', (data) => {
             if (data && data.systemInstruction) {
                 setInstruction(data.systemInstruction);
@@ -16,40 +18,46 @@ function ConfigPanel({ socket }) {
         return () => {
             socket.off('config');
         }
-    }, [socket]);
+    }, [socket, userId]);
 
     const handleSave = () => {
-        socket.emit('updateConfig', { systemInstruction: instruction });
+        socket.emit('updateConfig', {
+            userId,
+            systemInstruction: instruction
+        });
         setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
+        setTimeout(() => setSaved(false), 3000);
     };
 
     return (
         <div className="config-view">
             <header className="page-header">
-                <h2>Agent Configuration</h2>
-                <p>Define how your AI agent behaves</p>
+                <h2>Persona da IA</h2>
+                <p>Defina a personalidade e as regras do seu robô</p>
             </header>
 
-            <div className="config-form">
+            <div className="config-form card">
                 <div className="form-group">
-                    <label>System Instruction (Prompt)</label>
-                    <div className="helper-text">Describe the persona and rules for your AI agent.</div>
+                    <label className="flex-align">
+                        <Sparkles size={16} className="margin-right" />
+                        Instrução do Sistema (Prompt)
+                    </label>
+                    <div className="helper-text">Descreva detalhadamente como a IA deve agir, o que ela deve vender ou como deve responder aos clientes.</div>
                     <textarea
                         value={instruction}
                         onChange={(e) => setInstruction(e.target.value)}
                         className="premium-textarea"
-                        rows={10}
-                        placeholder="e.g. You are a helpful support agent for a shoe store..."
+                        rows={12}
+                        placeholder="Ex: Você é um vendedor amigável de uma loja de roupas. Seu objetivo é ajudar o cliente a escolher o tamanho certo e informar que entregamos em todo o Brasil..."
                     />
                 </div>
 
                 <div className="form-actions">
                     <button onClick={handleSave} className="premium-button">
                         <Save size={18} />
-                        Save Configuration
+                        Salvar Configurações
                     </button>
-                    {saved && <span className="save-indicator">Changes saved!</span>}
+                    {saved && <div className="save-indicator bounce-in">✓ Configurações salvas com sucesso!</div>}
                 </div>
             </div>
         </div>
