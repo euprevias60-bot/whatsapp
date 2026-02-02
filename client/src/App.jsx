@@ -35,8 +35,7 @@ function App() {
   };
 
   // Substitute with YOUR real Google Client ID from Google Cloud Console
-  // To test locally without a real ID, one can still use the mock login button
-  const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+  const GOOGLE_CLIENT_ID = "412723349811-io0r5hluk9id4qu0r3859p2k7hvun1vj.apps.googleusercontent.com";
 
   if (!user) {
     return (
