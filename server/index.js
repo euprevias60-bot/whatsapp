@@ -26,7 +26,7 @@ const { MercadoPagoConfig, Preference } = require('mercadopago');
 
 // Configuração Mercado Pago (Você precisará colocar seu Access Token no arquivo .env)
 const clientMP = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN || 'TEST-412723349811-020310-06915f07090b8f9e61298495a864'
+  accessToken: process.env.MP_ACCESS_TOKEN || 'APP_USR-4331530716884997-020309-8d2d0c7f343811f62bc142b3b61a8ca7-2627778833'
 });
 
 // Endpoint para criar o pagamento
@@ -44,6 +44,9 @@ app.post('/api/create-preference', async (req, res) => {
             unit_price: Number(price)
           }
         ],
+        payer: {
+          email: 'cliente@exemplo.com' // E-mail genérico para liberar o PIX
+        },
         notification_url: `${process.env.PUBLIC_URL || 'https://seu-site.railway.app'}/api/webhook/mercadopago`,
         external_reference: userId, // Importante para saber quem pagou
         back_urls: {
