@@ -51,7 +51,8 @@ function App() {
   // Substitute with YOUR real Google Client ID from Google Cloud Console
   const GOOGLE_CLIENT_ID = "412723349811-io0r5hluk9id4qu0r3859p2k7hvun1vj.apps.googleusercontent.com";
 
-  const isAdmin = user?.email === 'Mateusolivercrew@gmail.com';
+  const isAdmin = user?.email?.toLowerCase() === 'mateusolivercrew@gmail.com';
+  console.log("Current User Email:", user?.email, "Is Admin:", isAdmin);
 
   if (!user) {
     if (!showLogin) {
