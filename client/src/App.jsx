@@ -54,6 +54,12 @@ function App() {
   const isAdmin = user?.email?.toLowerCase() === 'mateusolivercrew@gmail.com';
   console.log("Current User Email:", user?.email, "Is Admin:", isAdmin);
 
+  useEffect(() => {
+    if (isAdmin) {
+      setIsSubscribed(true);
+    }
+  }, [isAdmin]);
+
   if (!user) {
     if (!showLogin) {
       return <LandingPage onStart={() => setShowLogin(true)} />;

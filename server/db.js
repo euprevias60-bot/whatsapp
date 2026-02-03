@@ -57,6 +57,12 @@ const getAllUsers = async () => {
 
 const checkSubscription = async (userId) => {
     const config = await getUserConfig(userId);
+
+    // Admin sempre tem acesso PRO
+    if (config.email && config.email.toLowerCase() === 'mateusolivercrew@gmail.com') {
+        return true;
+    }
+
     if (!config.isSubscribed) return false;
 
     if (config.subscriptionExpiry) {
