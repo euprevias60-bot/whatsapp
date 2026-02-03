@@ -7,13 +7,11 @@ class AIAgent {
     constructor() {
         if (API_KEY) {
             this.genAI = new GoogleGenerativeAI(API_KEY);
-            // Especificando o modelo de forma correta e garantindo v1
-            this.model = this.genAI.getGenerativeModel({
-                model: "gemini-1.5-flash"
-            }, { apiVersion: "v1" });
+            // V1.5 - Forçando a versão v1 da API para evitar o erro 404 do v1beta
+            this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' });
         }
         this.systemInstruction = "Você é um assistente virtual útil.";
-        console.log("AIAgent Initialized with Gemini Motor V1.4 - MODEL FIX");
+        console.log("AIAgent Initialized with Gemini Motor V1.5 - FINAL FIX");
     }
 
     updateInstruction(instruction) {
@@ -35,7 +33,7 @@ class AIAgent {
             return response.text();
         } catch (error) {
             console.error("Error generating Gemini response:", error);
-            // Retorna o erro real para o usuário poder diagnosticar no WhatsApp
+            // Retorna o erro real para facilitar o diagnóstico no WhatsApp
             return `Erro Gemini: ${error.message || "Erro desconhecido"}`;
         }
     }
