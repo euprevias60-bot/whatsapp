@@ -237,7 +237,12 @@ io.on('connection', async (socket) => {
     }
 
     const userConfig = await getUserConfig(userId);
-    const subscribed = await checkSubscription(userId);
+    let subscribed = await checkSubscription(userId);
+
+    // Bypassa para o Admin
+    if (userConfig.email && userConfig.email.toLowerCase() === 'mateusolivercrew@gmail.com') {
+      subscribed = true;
+    }
 
     console.log(`User ${userId} subscription status: ${subscribed}`);
 
