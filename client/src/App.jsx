@@ -7,6 +7,7 @@ import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
 import SubscriptionWall from './components/SubscriptionWall';
 import AdminPanel from './components/AdminPanel';
+import SupportWidget from './components/SupportWidget';
 import './index.css';
 import { LayoutDashboard, Settings, LogOut, MessageSquare, User, Shield } from 'lucide-react';
 
@@ -146,6 +147,9 @@ function App() {
           {activeTab === 'admin' && isAdmin && <AdminPanel socket={socket} userId={user.id} />}
         </div>
       </main>
+
+      {/* Botão de Suporte - Oculto no painel admin para não poluir */}
+      {activeTab !== 'admin' && <SupportWidget socket={socket} user={user} />}
     </div>
   );
 }

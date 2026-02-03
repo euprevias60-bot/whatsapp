@@ -266,9 +266,26 @@ io.on('connection', async (socket) => {
 
   socket.on('requestAllUsers', async (adminId) => {
     const userConfig = await getUserConfig(adminId);
-    if (userConfig.email === 'Mateusolivercrew@gmail.com') {
+    if (userConfig.email && userConfig.email.toLowerCase() === 'mateusolivercrew@gmail.com') {
       const users = await getAllUsers();
       socket.emit('allUsersList', users);
+    }
+  });
+
+  socket.on('sendSupportMessage', async (data) => {
+    const { userId, userEmail, message } = data;
+    await addSupportMessage(userId, userEmail, message);
+
+    // Notifica o admin se ele estiver online
+    const messages = await getSupportMessages();
+    io.emit('newSupportMessage', messages);
+  });
+
+  socket.on('requestSupportMessages', async (adminId) => {
+    const userConfig = await getUserConfig(adminId);
+    if (userConfig.email && userConfig.email.toLowerCase() === 'mateusolivercrew@gmail.com') {
+      const messages = await getSupportMessages();
+      socket.emit('supportMessagesList', messages);
     }
   });
 

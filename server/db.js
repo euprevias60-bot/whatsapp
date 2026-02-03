@@ -76,4 +76,30 @@ const checkSubscription = async (userId) => {
     return true;
 };
 
-module.exports = { getUserConfig, updateUserConfig, getAllUsers, checkSubscription };
+const addSupportMessage = async (userId, userEmail, message) => {
+    const db = await getDB();
+    if (!db.support) db.support = [];
+    db.support.push({
+        userId,
+        userEmail,
+        message,
+        timestamp: new Date().toISOString(),
+        read: false
+    });
+    await saveDB(db);
+    return db.support;
+};
+
+const getSupportMessages = async () => {
+    const db = await getDB();
+    return db.support || [];
+};
+
+module.exports = {
+    getUserConfig,
+    updateUserConfig,
+    getAllUsers,
+    checkSubscription,
+    addSupportMessage,
+    getSupportMessages
+};
