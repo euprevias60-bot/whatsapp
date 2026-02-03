@@ -7,12 +7,14 @@ class AIAgent {
     constructor() {
         if (API_KEY) {
             this.genAI = new GoogleGenerativeAI(API_KEY);
-            // V2.0 - Revertendo para o nativo com nomes de recurso completos
-            // Tentaremos o Flash primeiro
-            this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' });
+            // V2.1 - Usando os nomes mais explícitos possíveis
+            this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" }, { apiVersion: 'v1' });
+
+            // Diagnóstico de conexão
+            console.log("AIAgent Base Initialized - V2.1 (Absolute Sweep Mode)");
+            console.log("API Key found:", API_KEY.startsWith("AIza") ? "Yes (Valid Start)" : "Invalid/Missing");
         }
         this.systemInstruction = "Você é um assistente virtual útil.";
-        console.log("AIAgent Initialized - V2.0 (Native SDK / Full Resource Mode)");
     }
 
     updateInstruction(instruction) {
@@ -26,29 +28,37 @@ class AIAgent {
         }
 
         try {
-            // No Gemini nativo, enviamos instrução + mensagem
+            // Tentativa Principal
             const prompt = `Instrução de Sistema: ${this.systemInstruction}\n\nUsuário: ${userMessage}`;
             const result = await this.model.generateContent(prompt);
             const response = await result.response;
             return response.text();
-        } catch (error) {
-            console.error("Error generating Gemini response (V2.0):", error);
 
-            // Fallback automático para o modelo 8b se o flash falhar
-            if (error.message.includes("404") || error.message.includes("not found")) {
+        } catch (error) {
+            console.error("Error generating Gemini response (Attempt 1):", error.message);
+
+            // Fallback 1: gemini-1.5-flash (padrão sem o -latest)
+            try {
+                console.log("Fallback 1: Trying gemini-1.5-flash...");
+                const m2 = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' });
+                const result = await m2.generateContent(`Instrução: ${this.systemInstruction}\n\nMensagem: ${userMessage}`);
+                const response = await result.response;
+                return response.text();
+            } catch (err2) {
+                console.error("Fallback 1 failed:", err2.message);
+
+                // Fallback 2: gemini-pro (modelo clássico)
                 try {
-                    console.log("Attempting fallback to gemini-1.5-flash-8b...");
-                    const fallbackModel = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash-8b" }, { apiVersion: 'v1' });
-                    const prompt = `Instrução de Sistema: ${this.systemInstruction}\n\nUsuário: ${userMessage}`;
-                    const result = await fallbackModel.generateContent(prompt);
+                    console.log("Fallback 2: Trying gemini-pro...");
+                    const m3 = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+                    const result = await m3.generateContent(`Instrução: ${this.systemInstruction}\n\nMensagem: ${userMessage}`);
                     const response = await result.response;
                     return response.text();
-                } catch (fallbackError) {
-                    return `Erro Gemini V2.0 (Inclusive Fallback): ${fallbackError.message}`;
+                } catch (err3) {
+                    console.error("Fallback 2 failed:", err3.message);
+                    return `Erro Gemini V2.1: Todos os modelos falharam. Detalhe do erro principal: ${error.message}`;
                 }
             }
-
-            return `Erro Gemini V2.0: ${error.message || "Erro desconhecido"}`;
         }
     }
 }
