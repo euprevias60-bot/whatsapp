@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Smartphone, CheckCircle, AlertCircle, Loader2, LogOut, Play, Pause, Square, RefreshCw } from 'lucide-react';
+import { Smartphone, CheckCircle, AlertCircle, Loader2, LogOut, Play, Pause, Square, RefreshCw, MessageSquare, Clock, Activity, ShieldCheck, Zap } from 'lucide-react';
 
 function QRCodeView({ socket, userId }) {
     const [qrCode, setQrCode] = useState('');
@@ -9,7 +9,6 @@ function QRCodeView({ socket, userId }) {
     useEffect(() => {
         if (!userId) return;
 
-        // Request status on mount for this specific user
         socket.emit('requestStatus', userId);
 
         socket.on('qr', (data) => {
@@ -51,93 +50,121 @@ function QRCodeView({ socket, userId }) {
     };
 
     return (
-        <div className="dashboard-view">
-            <header className="page-header">
-                <div className="flex-between w-full">
-                    <div>
-                        <h2>Dashboard</h2>
-                        <p>Controle o seu agente inteligente</p>
-                    </div>
+        <div className="dashboard-container">
+            <header className="dashboard-header">
+                <div className="header-info">
+                    <h1>Central de Comando</h1>
+                    <p>Gerencie sua automação de WhatsApp com inteligência artificial</p>
+                </div>
 
-                    <div className="bot-controls">
-                        {status === 'disconnected' ? (
-                            <button className="control-btn start" onClick={handleStart}>
-                                <Play size={18} /> Iniciar Bot
+                <div className="action-group">
+                    {status === 'disconnected' ? (
+                        <button className="btn-primary-glow" onClick={handleStart}>
+                            <Play size={18} /> Ligar Assistente
+                        </button>
+                    ) : (
+                        <div className="bot-actions">
+                            <button className={`btn-status ${isPaused ? 'resume' : 'pause'}`} onClick={handlePause}>
+                                {isPaused ? <><Play size={18} /> Retomar IA</> : <><Pause size={18} /> Pausar IA</>}
                             </button>
-                        ) : (
-                            <>
-                                <button className={`control-btn pause ${isPaused ? 'resume' : ''}`} onClick={handlePause}>
-                                    {isPaused ? <><Play size={18} /> Retomar</> : <><Pause size={18} /> Pausar IA</>}
-                                </button>
-                                <button className="control-btn stop" onClick={handleStop}>
-                                    <Square size={18} /> Parar Bot
-                                </button>
-                            </>
-                        )}
-                    </div>
+                            <button className="btn-danger" onClick={handleStop}>
+                                <Square size={18} /> Desativar
+                            </button>
+                        </div>
+                    )}
                 </div>
             </header>
 
-            <div className="status-cards">
-                <div className="card status-card">
-                    <div className="flex-between">
-                        <div>
-                            <h3>Status da Operação</h3>
-                            <div className="flex-align gap-2 mt-2">
-                                <div className={`status-badge ${status}`}>
-                                    {status === 'disconnected' && <AlertCircle size={16} />}
-                                    {(status === 'connected' || status === 'authenticated') && <CheckCircle size={16} />}
-                                    {status === 'loading' && <RefreshCw size={16} className="spin" />}
-                                    <span>
-                                        {status === 'authenticated' ? 'Autenticado' :
-                                            status === 'connected' ? 'Pronto' :
-                                                status === 'loading' ? 'Iniciando...' : 'Desconectado'}
-                                    </span>
-                                </div>
-                                {isPaused && status !== 'disconnected' && (
-                                    <div className="status-badge paused">
-                                        <Pause size={16} />
-                                        <span>IA Pausada</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+            <div className="dashboard-stats">
+                <div className="dash-stat-card glass-effect">
+                    <div className="stat-header">
+                        <Activity size={20} className="icon-purple" />
+                        <span>Status</span>
+                    </div>
+                    <div className="stat-value">
+                        <h3 className={status}>
+                            {status === 'authenticated' ? 'Operacional' : status === 'connected' ? 'Pronto' : status === 'loading' ? 'Iniciando' : 'Offline'}
+                        </h3>
+                    </div>
+                </div>
+
+                <div className="dash-stat-card glass-effect">
+                    <div className="stat-header">
+                        <Zap size={20} className="icon-blue" />
+                        <span>Motor de IA</span>
+                    </div>
+                    <div className="stat-value">
+                        <h3>Gemini 2.0</h3>
+                    </div>
+                </div>
+
+                <div className="dash-stat-card glass-effect">
+                    <div className="stat-header">
+                        <ShieldCheck size={20} className="icon-green" />
+                        <span>Segurança</span>
+                    </div>
+                    <div className="stat-value">
+                        <h3>Criptografia Ativa</h3>
                     </div>
                 </div>
             </div>
 
-            <div className="qr-section">
-                {status === 'loading' ? (
-                    <div className="loading-qr card">
-                        <Loader2 className="spin" size={48} />
-                        <h3>Iniciando WhatsApp...</h3>
-                        <p>Isso pode levar até 30 segundos na nuvem.</p>
-                    </div>
-                ) : status === 'connected' || status === 'authenticated' ? (
-                    <div className="success-state">
-                        <div className="icon-circle success">
-                            <Smartphone size={48} />
+            <div className="dashboard-main-area">
+                <div className="connection-card glass-effect">
+                    <div className="card-top">
+                        <div className="flex-align gap-3">
+                            <div className="phone-icon-bg">
+                                <Smartphone size={24} />
+                            </div>
+                            <div>
+                                <h3>Conexão com Dispositivo</h3>
+                                <p>Sincronize seu WhatsApp para começar</p>
+                            </div>
                         </div>
-                        <h3>WhatsApp Conectado!</h3>
-                        <p>Seu agente de IA está ativo e respondendo mensagens automaticamente.</p>
+                        <div className={`status-indicator ${status}`}>
+                            {status === 'authenticated' ? 'Conectado' : 'Aguardando'}
+                        </div>
                     </div>
-                ) : (
-                    <div className="qr-container card">
-                        <h3>Vincular Novo Dispositivo</h3>
-                        <p className="instruction">1. Abra o WhatsApp no seu celular<br />2. Toque em Apresentações ou Configurações e selecione Aparelhos Conectados<br />3. Toque em Conectar um Aparelho e aponte para esta tela.</p>
 
-                        <div className="qr-display">
-                            {qrCode ? (
-                                <img src={qrCode} alt="WhatsApp QR Code" className="qr-image" />
-                            ) : (
-                                <div className="loading-qr">
-                                    <Loader2 className="spin" size={32} />
-                                    <p>Gerando código QR...</p>
+                    <div className="connection-content">
+                        {status === 'loading' ? (
+                            <div className="loading-stage">
+                                <Loader2 className="spin" size={60} />
+                                <h3>Preparando Instância...</h3>
+                                <p>Estamos configurando seu servidor dedicado de IA.</p>
+                            </div>
+                        ) : status === 'connected' || status === 'authenticated' ? (
+                            <div className="connected-stage">
+                                <div className="success-lottie-placeholder">
+                                    <CheckCircle size={80} className="success-pulse" />
                                 </div>
-                            )}
-                        </div>
+                                <h2>Tudo Pronto!</h2>
+                                <p>Sua inteligência artificial está ativa e monitorando conversas.</p>
+                                {isPaused && <div className="pause-banner">Assistente Pausado Manualmente</div>}
+                            </div>
+                        ) : qrCode ? (
+                            <div className="qr-stage">
+                                <div className="qr-frame">
+                                    <img src={qrCode} alt="WhatsApp QR" />
+                                </div>
+                                <div className="qr-steps">
+                                    <h4>Passo a Passo:</h4>
+                                    <ul>
+                                        <li><span>1</span> Abra o WhatsApp no celular</li>
+                                        <li><span>2</span> Vá em Aparelhos Conectados</li>
+                                        <li><span>3</span> Escaneie este código QR</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="offline-stage">
+                                <AlertCircle size={48} className="warn-icon" />
+                                <h3>Sistema Offline</h3>
+                                <p>Clique no botão "Ligar Assistente" acima para gerar seu acesso.</p>
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );

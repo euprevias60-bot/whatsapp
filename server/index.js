@@ -55,8 +55,13 @@ app.post('/api/create-preference', async (req, res) => {
 
     res.json({ id: result.id, init_point: result.init_point });
   } catch (error) {
-    console.error("Erro ao criar preferência:", error);
-    res.status(500).json({ error: "Erro ao gerar pagamento" });
+    console.error("Erro ao criar preferência Mercado Pago:");
+    if (error.response) {
+      console.error(JSON.stringify(error.response, null, 2));
+    } else {
+      console.error(error);
+    }
+    res.status(500).json({ error: "Erro ao gerar pagamento", details: error.message });
   }
 });
 
