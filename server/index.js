@@ -45,7 +45,9 @@ app.post('/api/create-preference', async (req, res) => {
           }
         ],
         payer: {
-          email: 'cliente@exemplo.com' // E-mail genérico para liberar o PIX
+          email: 'cliente@exemplo.com',
+          first_name: 'Cliente',
+          last_name: 'WhatsApp Bot'
         },
         notification_url: `${process.env.PUBLIC_URL || 'https://seu-site.railway.app'}/api/webhook/mercadopago`,
         external_reference: userId, // Importante para saber quem pagou
@@ -90,8 +92,20 @@ app.post('/api/webhook/mercadopago', async (req, res) => {
       const userId = query.userId || req.body.external_reference;
       if (userId) {
         console.log(`Ativando assinatura para usuário: ${userId}`);
-        await updateUserConfig(userId, { isSubscribed: true });
-        io.to(userId).emit('config', { isSubscribed: true }); // Avisa o front na hora
+
+        // Calcula 30 dias a partir de agora
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 30);
+
+        await updateUserConfig(userId, {
+          isSubscribed: true,
+          subscriptionExpiry: expiryDate.toISOString()
+        });
+
+        io.to(userId).emit('config', {
+          isSubscribed: true,
+          subscriptionExpiry: expiryDate.toISOString()
+        });
       }
     } catch (err) {
       console.error("Erro no webhook:", err);
@@ -212,13 +226,18 @@ io.on('connection', async (socket) => {
   console.log('New socket connected:', socket.id);
 
   // Join a room specific to the user
-  socket.on('join', async (userId) => {
+  socket.on('join', async (userId, userEmail) => {
     if (!userId) return;
     socket.join(userId);
     console.log(`Socket ${socket.id} joined room ${userId}`);
 
+    // Atualiza email se fornecido
+    if (userEmail) {
+      await updateUserConfig(userId, { email: userEmail });
+    }
+
     const userConfig = await getUserConfig(userId);
-    const subscribed = userConfig.isSubscribed || false;
+    const subscribed = await checkSubscription(userId);
 
     console.log(`User ${userId} subscription status: ${subscribed}`);
 
@@ -237,6 +256,14 @@ io.on('connection', async (socket) => {
         systemInstruction: userConfig.systemInstruction,
         isSubscribed: false
       });
+    }
+  });
+
+  socket.on('requestAllUsers', async (adminId) => {
+    const userConfig = await getUserConfig(adminId);
+    if (userConfig.email === 'Mateusolivercrew@gmail.com') {
+      const users = await getAllUsers();
+      socket.emit('allUsersList', users);
     }
   });
 

@@ -25,25 +25,49 @@ const saveDB = async (data) => {
 // Get User Config
 const getUserConfig = async (userId = 'default') => {
     const db = await getDB();
-    const config = db.users[userId] || {
-        systemInstruction: "Você é um assistente virtual útil.",
-        isSubscribed: false, // Default novo
-        subscriptionExpiry: null
-    };
-    return config;
+    if (!db.users[userId]) {
+        // Inicializa novo usuário com data de criação
+        db.users[userId] = {
+            systemInstruction: "Você é um assistente virtual útil.",
+            isSubscribed: false,
+            subscriptionExpiry: null,
+            createdAt: new Date().toISOString(),
+            email: '' // Será preenchido no login
+        };
+        await saveDB(db);
+    }
+    return db.users[userId];
 };
 
 // Update User Config
-const updateUserConfig = async (userId, config) => {
+const updateUserConfig = async (userId, newConfig) => {
     const db = await getDB();
-    db.users[userId] = { ...db.users[userId], ...config };
+    db.users[userId] = {
+        ...(db.users[userId] || { createdAt: new Date().toISOString() }),
+        ...newConfig
+    };
     await saveDB(db);
     return db.users[userId];
 };
 
-const checkSubscription = async (userId) => {
-    const config = await getUserConfig(userId);
-    return config.isSubscribed === true;
+const getAllUsers = async () => {
+    const db = await getDB();
+    return db.users;
 };
 
-module.exports = { getUserConfig, updateUserConfig, checkSubscription };
+const checkSubscription = async (userId) => {
+    const config = await getUserConfig(userId);
+    if (!config.isSubscribed) return false;
+
+    if (config.subscriptionExpiry) {
+        const expiry = new Date(config.subscriptionExpiry);
+        if (new Date() > expiry) {
+            // Expirou
+            await updateUserConfig(userId, { isSubscribed: false });
+            return false;
+        }
+    }
+    return true;
+};
+
+module.exports = { getUserConfig, updateUserConfig, getAllUsers, checkSubscription };
