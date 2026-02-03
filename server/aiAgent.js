@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // A chave será lida do ambiente (Railway) ou usará uma temporária se você quiser
@@ -7,13 +8,24 @@ class AIAgent {
     constructor() {
         if (API_KEY) {
             this.genAI = new GoogleGenerativeAI(API_KEY);
-            // V1.7 - Forçando o modelo mais recente e garantindo v1 estável no SDK
-            this.model = this.genAI.getGenerativeModel({
-                model: "gemini-1.5-flash-latest"
-            }, { apiVersion: "v1" });
+            // V1.8 - Voltando ao básico e adicionando diagnóstico
+            this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+            // Diagnóstico silencioso para ver modelos nos logs do Railway
+            this.listAvailableModels();
         }
         this.systemInstruction = "Você é um assistente virtual útil.";
-        console.log("AIAgent Initialized with Gemini v1.5 Flash-Latest (Forced V1) - V1.7");
+        console.log("AIAgent Initialized - V1.8 (Standard Mode)");
+    }
+
+    async listAvailableModels() {
+        try {
+            // Este log aparecerá nos logs do Railway quando ligar o servidor
+            console.log("--- Diagnóstico Gemini (Modelos Disponíveis) ---");
+            // No SDK atual, listModels pode ser restrito ou diferente, 
+            // vamos apenas tentar um log de confirmação da chave
+            console.log("API Key configurada (primeiros 5):", API_KEY.substring(0, 5) + "...");
+        } catch (e) { }
     }
 
     updateInstruction(instruction) {
@@ -36,12 +48,11 @@ class AIAgent {
         } catch (error) {
             console.error("Error generating Gemini response:", error);
 
-            // Tratamento de erro detalhado para ajudar no diagnóstico
             if (error.message.includes("404")) {
-                return "Erro 404: O Google não encontrou o modelo de IA. Verifique se o seu projeto no Railway está na região US-East (Ohio) ou se sua API Key é do tipo 'Free' no Google AI Studio.";
+                return `Erro 404 (V1.8): O Google não encontrou o modelo gemini-1.5-flash. Verifique sua região no Railway ou se a chave é válida para esse modelo. Detalhe: ${error.message}`;
             }
 
-            return `Erro Gemini: ${error.message || "Erro desconhecido"}`;
+            return `Erro Gemini (V1.8): ${error.message || "Erro desconhecido"}`;
         }
     }
 }
