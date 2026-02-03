@@ -86,12 +86,12 @@ function App() {
           <div className="profile-top">
             <div className="profile-avatar">
               {user.picture ? <img src={user.picture} alt="Profile" /> : <User size={24} />}
-              <div className={`status-ring ${isSubscribed ? 'premium' : 'free'}`}></div>
+              <div className={`status-ring ${isSubscribed || isAdmin ? 'premium' : 'free'}`}></div>
             </div>
             <div className="profile-meta">
               <h4>{user.name}</h4>
-              <span className={`plan-badge ${isSubscribed ? 'premium' : 'free'}`}>
-                {isSubscribed ? 'Plano Pro AI' : 'Plano Free'}
+              <span className={`plan-badge ${isSubscribed || isAdmin ? 'premium' : 'free'}`}>
+                {isSubscribed || isAdmin ? 'Plano Pro AI' : 'Plano Free'}
               </span>
             </div>
           </div>
@@ -136,7 +136,7 @@ function App() {
       <main className="main-content-area">
         <div className="content-container">
           {activeTab === 'dashboard' && (
-            isSubscribed ? (
+            (isSubscribed || isAdmin) ? (
               <QRCodeView socket={socket} userId={user.id} />
             ) : (
               <SubscriptionWall userId={user.id} />
