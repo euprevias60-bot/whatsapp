@@ -369,5 +369,5 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Deployment Version: Gemini-Admin-Support-v1.3`);
+  console.log(`Deployment Version: V1.7 - Gemini Fixed`);
 });

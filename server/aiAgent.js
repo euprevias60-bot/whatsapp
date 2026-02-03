@@ -7,12 +7,13 @@ class AIAgent {
     constructor() {
         if (API_KEY) {
             this.genAI = new GoogleGenerativeAI(API_KEY);
-            // V1.6 - Usando 'gemini-pro' que tem maior compatibilidade global
-            // e removendo a trava de apiVersion para o SDK decidir a melhor
-            this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+            // V1.7 - Forçando o modelo mais recente e garantindo v1 estável no SDK
+            this.model = this.genAI.getGenerativeModel({
+                model: "gemini-1.5-flash-latest"
+            }, { apiVersion: "v1" });
         }
         this.systemInstruction = "Você é um assistente virtual útil.";
-        console.log("AIAgent Initialized with Gemini Pro - V1.6 (Compatibility Mode)");
+        console.log("AIAgent Initialized with Gemini v1.5 Flash-Latest (Forced V1) - V1.7");
     }
 
     updateInstruction(instruction) {
@@ -35,9 +36,9 @@ class AIAgent {
         } catch (error) {
             console.error("Error generating Gemini response:", error);
 
-            // Tenta um fallback para o flash se o pro falhar por algum motivo (ou vice-versa)
+            // Tratamento de erro detalhado para ajudar no diagnóstico
             if (error.message.includes("404")) {
-                return "Erro 404: O modelo de IA não foi encontrado nesta região do servidor Railway. Tente trocar a região do seu projeto no Railway para 'US-East' ou use outra API Key.";
+                return "Erro 404: O Google não encontrou o modelo de IA. Verifique se o seu projeto no Railway está na região US-East (Ohio) ou se sua API Key é do tipo 'Free' no Google AI Studio.";
             }
 
             return `Erro Gemini: ${error.message || "Erro desconhecido"}`;
