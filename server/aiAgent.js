@@ -1,18 +1,15 @@
-const OpenAI = require("openai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// OpenRouter API Key provided by user
-const API_KEY = "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";
+// A chave será lida do ambiente (Railway) ou usará uma temporária se você quiser
+const API_KEY = process.env.GEMINI_API_KEY || "";
 
 class AIAgent {
     constructor() {
-        this.openai = new OpenAI({
-            baseURL: "https://openrouter.ai/api/v1",
-            apiKey: API_KEY,
-        });
+        if (API_KEY) {
+            this.genAI = new GoogleGenerativeAI(API_KEY);
+            this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        }
         this.systemInstruction = "Você é um assistente virtual útil.";
-        // Chat history could be managed here or per user session in a real DB
-        // For simple demo, we unfortunately can't keep context per user easily without a DB
-        // So we will just send the system instruction + user message for now, or simple in-memory map
     }
 
     updateInstruction(instruction) {
@@ -21,19 +18,23 @@ class AIAgent {
     }
 
     async generateResponse(userMessage) {
-        try {
-            const completion = await this.openai.chat.completions.create({
-                model: "google/gemini-2.0-flash-001", // Confirmed working model
-                messages: [
-                    { role: "system", content: this.systemInstruction },
-                    { role: "user", content: userMessage }
-                ],
-            });
+        if (!API_KEY) {
+            return "Erro: GEMINI_API_KEY não configurada no Railway.";
+        }
 
-            return completion.choices[0].message.content;
+        try {
+            // No Gemini Free, enviamos a instrução de sistema junto com a mensagem
+            const prompt = `Instrução de Sistema: ${this.systemInstruction}\n\nUsuário: ${userMessage}`;
+
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            return response.text();
         } catch (error) {
-            console.error("Error generating AI response:", error);
-            return "Desculpe, tive um erro ao processar sua mensagem via OpenRouter.";
+            console.error("Error generating Gemini response:", error);
+            if (error.message.includes("API_KEY_INVALID")) {
+                return "Erro: Sua GEMINI_API_KEY parece ser inválida. Verifique no Google AI Studio.";
+            }
+            return "Desculpe, tive um erro ao processar sua mensagem via Google Gemini.";
         }
     }
 }
