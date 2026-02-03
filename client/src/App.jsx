@@ -3,6 +3,7 @@ import io from 'socket.io-client';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import QRCodeView from './components/QRCodeView';
 import ConfigPanel from './components/ConfigPanel';
+import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
 import './index.css';
 import { LayoutDashboard, Settings, LogOut, MessageSquare, User } from 'lucide-react';
@@ -13,6 +14,7 @@ const socket = io(window.location.hostname === 'localhost' ? 'http://localhost:3
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showLogin, setShowLogin] = useState(false);
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
@@ -39,6 +41,9 @@ function App() {
   const GOOGLE_CLIENT_ID = "412723349811-io0r5hluk9id4qu0r3859p2k7hvun1vj.apps.googleusercontent.com";
 
   if (!user) {
+    if (!showLogin) {
+      return <LandingPage onStart={() => setShowLogin(true)} />;
+    }
     return (
       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
         <LoginPage onLogin={handleLogin} />

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Smartphone, CheckCircle, AlertCircle, Loader2, LogOut } from 'lucide-react';
+import { Smartphone, CheckCircle, AlertCircle, Loader2, LogOut, Play, Pause, Square, RefreshCw } from 'lucide-react';
 
 function QRCodeView({ socket, userId }) {
     const [qrCode, setQrCode] = useState('');
-    const [status, setStatus] = useState('disconnected'); // disconnected, connected, authenticated
+    const [status, setStatus] = useState('disconnected'); // disconnected, loading, connected, authenticated
+    const [isPaused, setIsPaused] = useState(false);
 
     useEffect(() => {
         if (!userId) return;
@@ -24,43 +25,83 @@ function QRCodeView({ socket, userId }) {
             }
         });
 
+        socket.on('paused_status', (paused) => {
+            setIsPaused(paused);
+        });
+
         return () => {
             socket.off('qr');
             socket.off('status');
+            socket.off('paused_status');
         };
     }, [socket, userId]);
 
-    const handleWhatsAppLogout = () => {
-        if (window.confirm("Deseja realmente desconectar o WhatsApp desta conta?")) {
-            socket.emit('logout_whatsapp', userId);
+    const handleStart = () => {
+        socket.emit('start_bot', userId);
+    };
+
+    const handleStop = () => {
+        if (window.confirm("Isso irá desconectar seu WhatsApp e fechar o robô. Continuar?")) {
+            socket.emit('stop_bot', userId);
         }
+    };
+
+    const handlePause = () => {
+        socket.emit('pause_bot', userId);
     };
 
     return (
         <div className="dashboard-view">
             <header className="page-header">
-                <h2>Dashboard</h2>
-                <p>Gerencie sua conexão com o WhatsApp</p>
+                <div className="flex-between w-full">
+                    <div>
+                        <h2>Dashboard</h2>
+                        <p>Controle o seu agente inteligente</p>
+                    </div>
+
+                    <div className="bot-controls">
+                        {status === 'disconnected' ? (
+                            <button className="control-btn start" onClick={handleStart}>
+                                <Play size={18} /> Iniciar Bot
+                            </button>
+                        ) : (
+                            <>
+                                <button className={`control-btn pause ${isPaused ? 'resume' : ''}`} onClick={handlePause}>
+                                    {isPaused ? <><Play size={18} /> Retomar</> : <><Pause size={18} /> Pausar IA</>}
+                                </button>
+                                <button className="control-btn stop" onClick={handleStop}>
+                                    <Square size={18} /> Parar Bot
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
             </header>
 
             <div className="status-cards">
                 <div className="card status-card">
                     <div className="flex-between">
                         <div>
-                            <h3>Status da Conexão</h3>
-                            <div className={`status-badge ${status}`}>
-                                {status === 'disconnected' && <AlertCircle size={16} />}
-                                {status === 'connected' && <CheckCircle size={16} />}
-                                {status === 'authenticated' && <CheckCircle size={16} />}
-                                <span>{status === 'authenticated' ? 'Autenticado' : status === 'connected' ? 'Pronto' : 'Desconectado'}</span>
+                            <h3>Status da Operação</h3>
+                            <div className="flex-align gap-2 mt-2">
+                                <div className={`status-badge ${status}`}>
+                                    {status === 'disconnected' && <AlertCircle size={16} />}
+                                    {(status === 'connected' || status === 'authenticated') && <CheckCircle size={16} />}
+                                    {status === 'loading' && <RefreshCw size={16} className="spin" />}
+                                    <span>
+                                        {status === 'authenticated' ? 'Autenticado' :
+                                            status === 'connected' ? 'Pronto' :
+                                                status === 'loading' ? 'Iniciando...' : 'Desconectado'}
+                                    </span>
+                                </div>
+                                {isPaused && status !== 'disconnected' && (
+                                    <div className="status-badge paused">
+                                        <Pause size={16} />
+                                        <span>IA Pausada</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
-                        {(status === 'connected' || status === 'authenticated') && (
-                            <button className="secondary-btn logout-wa" onClick={handleWhatsAppLogout}>
-                                <LogOut size={16} />
-                                Desconectar WhatsApp
-                            </button>
-                        )}
                     </div>
                 </div>
             </div>

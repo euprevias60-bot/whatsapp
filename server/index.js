@@ -49,10 +49,12 @@ async function getOrCreateSession(userId, io) {
     aiAgent,
     status: 'loading',
     qr: null,
+    paused: false,
     humanInteractions: new Map()
   };
 
-  io.to(userId).emit('status', 'loading');
+  io.to(userId).emit('status', session.status);
+  io.to(userId).emit('paused_status', session.paused);
 
   const INACTIVITY_TIMEOUT = 5 * 60 * 1000;
 
@@ -97,13 +99,17 @@ async function getOrCreateSession(userId, io) {
   });
 
   client.on('message', async msg => {
+    // Condition 1: Paused by user
+    if (session.paused) return;
+
+    // Condition 2: Basic filters
     if (msg.fromMe || msg.from === 'status@broadcast') return;
 
     const chat = await msg.getChat();
     const chatId = chat.id._serialized;
     const lastHumanTime = session.humanInteractions.get(chatId) || 0;
 
-    // If human acted recently, don't reply
+    // Condition 3: Human takeover (5 min)
     if (Date.now() - lastHumanTime < INACTIVITY_TIMEOUT) return;
 
     try {
@@ -116,6 +122,8 @@ async function getOrCreateSession(userId, io) {
     }
   });
 
+  // We only initialize if specific start command is given or if we want auto-start
+  // Let's keep it auto-start on session creation for now, but provide controls to stop it.
   client.initialize().catch(err => console.error(`Failed to initialize client for ${userId}:`, err));
 
   sessions.set(userId, session);
@@ -136,6 +144,7 @@ io.on('connection', async (socket) => {
 
     // Send current state
     socket.emit('status', session.status);
+    socket.emit('paused_status', session.paused);
     if (session.qr) socket.emit('qr', session.qr);
     socket.emit('config', { systemInstruction: session.aiAgent.systemInstruction });
   });
@@ -154,23 +163,42 @@ io.on('connection', async (socket) => {
     if (!userId) return;
     const session = await getOrCreateSession(userId, io);
     socket.emit('status', session.status);
+    socket.emit('paused_status', session.paused);
   });
 
-  socket.on('logout_whatsapp', async (userId) => {
+  socket.on('pause_bot', async (userId) => {
+    if (!userId) return;
+    const session = sessions.get(userId);
+    if (session) {
+      session.paused = !session.paused; // Toggle pause
+      io.to(userId).emit('paused_status', session.paused);
+      console.log(`User ${userId} bot paused state: ${session.paused}`);
+    }
+  });
+
+  socket.on('stop_bot', async (userId) => {
     if (!userId) return;
     const session = sessions.get(userId);
     if (session && session.client) {
       try {
-        await session.client.logout();
-        session.status = 'disconnected';
-        session.qr = null;
+        await session.client.logout(); // Logout from WA
+        await session.client.destroy(); // Properly kill the browser
+        sessions.delete(userId); // Remove session
         io.to(userId).emit('status', 'disconnected');
+        console.log(`User ${userId} bot stopped and session deleted.`);
       } catch (err) {
-        console.error(`Logout error for ${userId}:`, err);
+        console.error(`Stop bot error for ${userId}:`, err);
       }
     }
   });
+
+  socket.on('start_bot', async (userId) => {
+    if (!userId) return;
+    // This will trigger creation and initialization
+    await getOrCreateSession(userId, io);
+  });
 });
+
 
 
 // Production logic
