@@ -62,50 +62,67 @@ function App() {
 
   return (
     <div className="app-container">
-      <nav className="sidebar">
-        <div className="user-profile">
-          <div className="avatar">
-            {user.picture ? <img src={user.picture} alt="Profile" /> : <User size={20} />}
-          </div>
-          <div className="user-info">
-            <h4>{user.name}</h4>
-            <span>{isSubscribed ? 'Premium' : 'Gratuito'}</span>
+      <nav className="sidebar-modern glass-effect">
+        <div className="sidebar-brand">
+          <div className="brand-logo">AI</div>
+          <div className="brand-text">
+            <span>WhatsApp</span>
+            <small>Premium Agent</small>
           </div>
         </div>
 
-        <div className="nav-links">
+        <div className="user-profile-card">
+          <div className="profile-top">
+            <div className="profile-avatar">
+              {user.picture ? <img src={user.picture} alt="Profile" /> : <User size={24} />}
+              <div className={`status-ring ${isSubscribed ? 'premium' : 'free'}`}></div>
+            </div>
+            <div className="profile-meta">
+              <h4>{user.name}</h4>
+              <span className={`plan-badge ${isSubscribed ? 'premium' : 'free'}`}>
+                {isSubscribed ? 'Plano Pro AI' : 'Plano Free'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="nav-menu">
           <button
-            className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+            className={`nav-menu-item ${activeTab === 'dashboard' ? 'active' : ''}`}
             onClick={() => setActiveTab('dashboard')}
           >
-            <LayoutDashboard size={20} />
-            Dashboard
+            <div className="nav-icon"><LayoutDashboard size={20} /></div>
+            <span>Dashboard</span>
           </button>
+
           <button
-            className={`nav-item ${activeTab === 'config' ? 'active' : ''}`}
+            className={`nav-menu-item ${activeTab === 'config' ? 'active' : ''}`}
             onClick={() => setActiveTab('config')}
           >
-            <Settings size={20} />
-            Configuração
+            <div className="nav-icon"><Settings size={20} /></div>
+            <span>Configuração</span>
           </button>
         </div>
-        <div className="nav-footer">
-          <button className="nav-item logout" onClick={handleLogout}>
-            <LogOut size={20} />
-            Sair da Conta
+
+        <div className="sidebar-bottom">
+          <button className="logout-btn" onClick={handleLogout}>
+            <LogOut size={18} />
+            <span>Sair do Sistema</span>
           </button>
         </div>
       </nav>
 
-      <main className="main-content">
-        {activeTab === 'dashboard' && (
-          isSubscribed ? (
-            <QRCodeView socket={socket} userId={user.id} />
-          ) : (
-            <SubscriptionWall userId={user.id} />
-          )
-        )}
-        {activeTab === 'config' && <ConfigPanel socket={socket} userId={user.id} />}
+      <main className="main-content-area">
+        <div className="content-container">
+          {activeTab === 'dashboard' && (
+            isSubscribed ? (
+              <QRCodeView socket={socket} userId={user.id} />
+            ) : (
+              <SubscriptionWall userId={user.id} />
+            )
+          )}
+          {activeTab === 'config' && <ConfigPanel socket={socket} userId={user.id} />}
+        </div>
       </main>
     </div>
   );
