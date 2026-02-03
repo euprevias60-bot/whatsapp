@@ -19,7 +19,8 @@ body {
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg-deep);
   color: var(--text-main);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   /* Prevent body scroll, handle in main */
 }
 
