@@ -14,7 +14,7 @@ class AIAgent {
             });
         }
         this.systemInstruction = "Você é um assistente virtual útil.";
-        console.log("AIAgent Initialized with Gemini v1.5 Flash");
+        console.log("AIAgent Initialized with Gemini v1.5 Flash - V1.3");
     }
 
     updateInstruction(instruction) {
