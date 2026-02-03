@@ -369,5 +369,5 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Deployment Version: V1.8 - Debug Active`);
+  console.log(`Deployment Version: V1.9 - OpenAI Protocol Active`);
 });

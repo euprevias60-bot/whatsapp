@@ -1,5 +1,4 @@
-require('dotenv').config();
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const OpenAI = require("openai");
 
 // A chave será lida do ambiente (Railway) ou usará uma temporária se você quiser
 const API_KEY = process.env.GEMINI_API_KEY || "";
@@ -7,25 +6,15 @@ const API_KEY = process.env.GEMINI_API_KEY || "";
 class AIAgent {
     constructor() {
         if (API_KEY) {
-            this.genAI = new GoogleGenerativeAI(API_KEY);
-            // V1.8 - Voltando ao básico e adicionando diagnóstico
-            this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-            // Diagnóstico silencioso para ver modelos nos logs do Railway
-            this.listAvailableModels();
+            // V1.9 - Usando o Protocolo OpenAI para falar com o Gemini
+            // Isso costuma ser mais estável contra erros de 404 do SDK nativo
+            this.client = new OpenAI({
+                apiKey: API_KEY,
+                baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/"
+            });
         }
         this.systemInstruction = "Você é um assistente virtual útil.";
-        console.log("AIAgent Initialized - V1.8 (Standard Mode)");
-    }
-
-    async listAvailableModels() {
-        try {
-            // Este log aparecerá nos logs do Railway quando ligar o servidor
-            console.log("--- Diagnóstico Gemini (Modelos Disponíveis) ---");
-            // No SDK atual, listModels pode ser restrito ou diferente, 
-            // vamos apenas tentar um log de confirmação da chave
-            console.log("API Key configurada (primeiros 5):", API_KEY.substring(0, 5) + "...");
-        } catch (e) { }
+        console.log("AIAgent Initialized with Gemini (OpenAI Protocol) - V1.9");
     }
 
     updateInstruction(instruction) {
@@ -39,20 +28,20 @@ class AIAgent {
         }
 
         try {
-            // No Gemini Free, enviamos a instrução de sistema junto com a mensagem
-            const prompt = `Instrução de Sistema: ${this.systemInstruction}\n\nUsuário: ${userMessage}`;
+            const completion = await this.client.chat.completions.create({
+                model: "gemini-1.5-flash",
+                messages: [
+                    { role: "system", content: this.systemInstruction },
+                    { role: "user", content: userMessage },
+                ],
+            });
 
-            const result = await this.model.generateContent(prompt);
-            const response = await result.response;
-            return response.text();
+            return completion.choices[0].message.content;
         } catch (error) {
-            console.error("Error generating Gemini response:", error);
+            console.error("Error generating Gemini response (OpenAI Protocol):", error);
 
-            if (error.message.includes("404")) {
-                return `Erro 404 (V1.8): O Google não encontrou o modelo gemini-1.5-flash. Verifique sua região no Railway ou se a chave é válida para esse modelo. Detalhe: ${error.message}`;
-            }
-
-            return `Erro Gemini (V1.8): ${error.message || "Erro desconhecido"}`;
+            // Retorna o erro detalhado para o WhatsApp
+            return `Erro Gemini V1.9: ${error.message || "Erro desconhecido"}`;
         }
     }
 }
