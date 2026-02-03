@@ -9,12 +9,11 @@ class AIAgent {
             this.genAI = new GoogleGenerativeAI(API_KEY);
             // Especificando o modelo de forma correta e garantindo v1
             this.model = this.genAI.getGenerativeModel({
-                model: "gemini-1.5-flash",
-                apiVersion: 'v1'
-            });
+                model: "gemini-1.5-flash"
+            }, { apiVersion: "v1" });
         }
         this.systemInstruction = "Você é um assistente virtual útil.";
-        console.log("AIAgent Initialized with Gemini v1.5 Flash - V1.3");
+        console.log("AIAgent Initialized with Gemini Motor V1.4 - MODEL FIX");
     }
 
     updateInstruction(instruction) {
