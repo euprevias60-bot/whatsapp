@@ -21,7 +21,14 @@ app.use(express.json());
 const PORT = process.env.PORT || 3001;
 
 const { AIAgent } = require('./aiAgent');
-const { getUserConfig, updateUserConfig, checkSubscription } = require('./db');
+const {
+  getUserConfig,
+  updateUserConfig,
+  checkSubscription,
+  getAllUsers,
+  addSupportMessage,
+  getSupportMessages
+} = require('./db');
 const { MercadoPagoConfig, Preference } = require('mercadopago');
 
 // Configuração Mercado Pago (Você precisará colocar seu Access Token no arquivo .env)
@@ -362,5 +369,4 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Deployment Version: Gemini-Admin-Support-v1.1`);
 });

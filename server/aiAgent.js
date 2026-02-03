@@ -7,10 +7,14 @@ class AIAgent {
     constructor() {
         if (API_KEY) {
             this.genAI = new GoogleGenerativeAI(API_KEY);
-            this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            // Especificando o modelo de forma correta e garantindo v1
+            this.model = this.genAI.getGenerativeModel({
+                model: "gemini-1.5-flash",
+                apiVersion: 'v1'
+            });
         }
         this.systemInstruction = "Você é um assistente virtual útil.";
-        console.log("AIAgent Initialized with Gemini Motor v1.2");
+        console.log("AIAgent Initialized with Gemini v1.5 Flash");
     }
 
     updateInstruction(instruction) {
@@ -32,10 +36,8 @@ class AIAgent {
             return response.text();
         } catch (error) {
             console.error("Error generating Gemini response:", error);
-            if (error.message.includes("API_KEY_INVALID")) {
-                return "Erro: Sua GEMINI_API_KEY parece ser inválida. Verifique no Google AI Studio.";
-            }
-            return "Desculpe, tive um erro ao processar sua mensagem via Google Gemini.";
+            // Retorna o erro real para o usuário poder diagnosticar no WhatsApp
+            return `Erro Gemini: ${error.message || "Erro desconhecido"}`;
         }
     }
 }
