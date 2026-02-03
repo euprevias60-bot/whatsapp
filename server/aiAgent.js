@@ -10,6 +10,7 @@ class AIAgent {
             this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         }
         this.systemInstruction = "Você é um assistente virtual útil.";
+        console.log("AIAgent Initialized with Gemini Motor v1.2");
     }
 
     updateInstruction(instruction) {
