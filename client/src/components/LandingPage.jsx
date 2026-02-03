@@ -109,11 +109,48 @@ function LandingPage({ onStart }) {
                 </div>
             </section>
 
+            <section className="pricing-section">
+                <div className="section-header">
+                    <h2>Planos e Preços</h2>
+                    <p>Escolha o plano ideal para o seu negócio crescer</p>
+                </div>
+
+                <div className="pricing-grid">
+                    <div className="pricing-card featured">
+                        <div className="featured-badge">Plano Único</div>
+                        <div className="p-header">
+                            <h3>Acesso Pro AI</h3>
+                            <div className="price">R$ 59<span>,90/mês</span></div>
+                        </div>
+                        <ul className="p-features">
+                            <li><CheckCircle size={16} /> WhatsApp Ilimitado</li>
+                            <li><CheckCircle size={16} /> IA Gemini 2.0 Flash</li>
+                            <li><CheckCircle size={16} /> Human Takeover (Pausa Automática)</li>
+                            <li><CheckCircle size={16} /> Suporte Prioritário</li>
+                        </ul>
+                        <button className="pricing-btn" onClick={onStart}>Assinar Agora</button>
+                    </div>
+                </div>
+            </section>
+
             <footer className="landing-footer">
                 <p>&copy; 2024 WhatsApp AI Agent. O futuro do atendimento automatizado.</p>
             </footer>
         </div>
     );
+}
+
+// Helper para os ícones de check na lista
+function CheckCircle({ size }) {
+    return (
+        <svg
+            width={size} height={size} viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+            style={{ color: '#10b981', marginRight: '10px' }}
+        >
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+    )
 }
 
 export default LandingPage;

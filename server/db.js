@@ -25,7 +25,12 @@ const saveDB = async (data) => {
 // Get User Config
 const getUserConfig = async (userId = 'default') => {
     const db = await getDB();
-    return db.users[userId] || { systemInstruction: "Você é um assistente virtual útil." };
+    const config = db.users[userId] || {
+        systemInstruction: "Você é um assistente virtual útil.",
+        isSubscribed: false, // Default novo
+        subscriptionExpiry: null
+    };
+    return config;
 };
 
 // Update User Config
@@ -36,4 +41,9 @@ const updateUserConfig = async (userId, config) => {
     return db.users[userId];
 };
 
-module.exports = { getUserConfig, updateUserConfig };
+const checkSubscription = async (userId) => {
+    const config = await getUserConfig(userId);
+    return config.isSubscribed === true;
+};
+
+module.exports = { getUserConfig, updateUserConfig, checkSubscription };

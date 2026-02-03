@@ -5,6 +5,7 @@ import QRCodeView from './components/QRCodeView';
 import ConfigPanel from './components/ConfigPanel';
 import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
+import SubscriptionWall from './components/SubscriptionWall';
 import './index.css';
 import { LayoutDashboard, Settings, LogOut, MessageSquare, User } from 'lucide-react';
 
@@ -15,6 +16,7 @@ const socket = io(window.location.hostname === 'localhost' ? 'http://localhost:3
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showLogin, setShowLogin] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
@@ -23,7 +25,14 @@ function App() {
   useEffect(() => {
     if (user && user.id) {
       socket.emit('join', user.id);
+
+      socket.on('config', (data) => {
+        if (data.isSubscribed !== undefined) {
+          setIsSubscribed(data.isSubscribed);
+        }
+      });
     }
+    return () => socket.off('config');
   }, [user]);
 
   const handleLogin = (userData) => {
@@ -60,7 +69,7 @@ function App() {
           </div>
           <div className="user-info">
             <h4>{user.name}</h4>
-            <span>Logado</span>
+            <span>{isSubscribed ? 'Premium' : 'Gratuito'}</span>
           </div>
         </div>
 
@@ -89,7 +98,13 @@ function App() {
       </nav>
 
       <main className="main-content">
-        {activeTab === 'dashboard' && <QRCodeView socket={socket} userId={user.id} />}
+        {activeTab === 'dashboard' && (
+          isSubscribed ? (
+            <QRCodeView socket={socket} userId={user.id} />
+          ) : (
+            <SubscriptionWall userId={user.id} />
+          )
+        )}
         {activeTab === 'config' && <ConfigPanel socket={socket} userId={user.id} />}
       </main>
     </div>

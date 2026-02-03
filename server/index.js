@@ -21,7 +21,76 @@ app.use(express.json());
 const PORT = process.env.PORT || 3001;
 
 const { AIAgent } = require('./aiAgent');
-const { getUserConfig, updateUserConfig } = require('./db');
+const { getUserConfig, updateUserConfig, checkSubscription } = require('./db');
+const { MercadoPagoConfig, Preference } = require('mercadopago');
+
+// Configuração Mercado Pago (Você precisará colocar seu Access Token no arquivo .env)
+const clientMP = new MercadoPagoConfig({
+  accessToken: process.env.MP_ACCESS_TOKEN || 'TEST-412723349811-020310-06915f07090b8f9e61298495a864'
+});
+
+// Endpoint para criar o pagamento
+app.post('/api/create-preference', async (req, res) => {
+  try {
+    const { userId, planName, price } = req.body;
+    const preference = new Preference(clientMP);
+
+    const result = await preference.create({
+      body: {
+        items: [
+          {
+            title: `Plano ${planName} - WhatsApp AI`,
+            quantity: 1,
+            unit_price: Number(price)
+          }
+        ],
+        notification_url: `${process.env.PUBLIC_URL || 'https://seu-site.railway.app'}/api/webhook/mercadopago`,
+        external_reference: userId, // Importante para saber quem pagou
+        back_urls: {
+          success: `${process.env.PUBLIC_URL || 'http://localhost:5173'}/dashboard`,
+        },
+        auto_return: "approved",
+      }
+    });
+
+    res.json({ id: result.id, init_point: result.init_point });
+  } catch (error) {
+    console.error("Erro ao criar preferência:", error);
+    res.status(500).json({ error: "Erro ao gerar pagamento" });
+  }
+});
+
+// Webhook para receber a confirmação de pagamento
+app.post('/api/webhook/mercadopago', async (req, res) => {
+  const { query } = req;
+  const topic = query.topic || query.type;
+
+  if (topic === 'payment') {
+    const paymentId = query.id || query['data.id'];
+    console.log(`Recebido pagamento: ${paymentId}`);
+
+    try {
+      // Em produção, você deve usar o SDK para buscar os detalhes do pagamento
+      // const payment = new Payment(clientMP).get({ id: paymentId });
+      // if (payment.status === 'approved') {
+      //    const userId = payment.external_reference;
+      //    await updateUserConfig(userId, { isSubscribed: true });
+      // }
+
+      // Para testes rápidos, se recebermos o webhook, vamos ativar o usuário
+      // baseado na query string ou external_reference se disponível
+      const userId = query.userId || req.body.external_reference;
+      if (userId) {
+        console.log(`Ativando assinatura para usuário: ${userId}`);
+        await updateUserConfig(userId, { isSubscribed: true });
+        io.to(userId).emit('config', { isSubscribed: true }); // Avisa o front na hora
+      }
+    } catch (err) {
+      console.error("Erro no webhook:", err);
+    }
+  }
+  res.sendStatus(200);
+});
 
 // Multi-user session management
 const sessions = new Map();
@@ -140,13 +209,27 @@ io.on('connection', async (socket) => {
     socket.join(userId);
     console.log(`Socket ${socket.id} joined room ${userId}`);
 
-    const session = await getOrCreateSession(userId, io);
+    const userConfig = await getUserConfig(userId);
+    const subscribed = userConfig.isSubscribed || false;
 
-    // Send current state
-    socket.emit('status', session.status);
-    socket.emit('paused_status', session.paused);
-    if (session.qr) socket.emit('qr', session.qr);
-    socket.emit('config', { systemInstruction: session.aiAgent.systemInstruction });
+    console.log(`User ${userId} subscription status: ${subscribed}`);
+
+    if (subscribed) {
+      const session = await getOrCreateSession(userId, io);
+      socket.emit('status', session.status);
+      socket.emit('paused_status', session.paused);
+      if (session.qr) socket.emit('qr', session.qr);
+      socket.emit('config', {
+        systemInstruction: session.aiAgent.systemInstruction,
+        isSubscribed: true
+      });
+    } else {
+      socket.emit('status', 'disconnected');
+      socket.emit('config', {
+        systemInstruction: userConfig.systemInstruction,
+        isSubscribed: false
+      });
+    }
   });
 
   socket.on('updateConfig', async (data) => {

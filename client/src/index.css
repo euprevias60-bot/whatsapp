@@ -1019,3 +1019,292 @@ body {
     display: none;
   }
 }
+
+/* Pricing Section Styles */
+.pricing-section {
+  padding: 8rem 5%;
+  background: #020617;
+  z-index: 10;
+  position: relative;
+}
+
+.pricing-grid {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+  margin-top: 4rem;
+}
+
+.pricing-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2rem;
+  padding: 3rem 2.5rem;
+  width: 100%;
+  max-width: 380px;
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.pricing-card.featured {
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px solid #8b5cf6;
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+}
+
+.pricing-card:hover {
+  transform: translateY(-10px);
+}
+
+.pricing-card.featured:hover {
+  transform: translateY(-10px) scale(1.05);
+}
+
+.featured-badge {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #8b5cf6;
+  color: white;
+  padding: 0.4rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.p-header h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #94a3b8;
+}
+
+.price {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  color: white;
+}
+
+.price span {
+  font-size: 1rem;
+  color: #64748b;
+  font-weight: 400;
+}
+
+.p-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 3rem 0;
+  flex: 1;
+}
+
+.p-features li {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  color: #94a3b8;
+  margin-bottom: 1.2rem;
+}
+
+.pricing-btn {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.pricing-card.featured .pricing-btn {
+  background: #8b5cf6;
+  border: none;
+}
+
+.pricing-btn:hover {
+  background: white;
+  color: black;
+}
+
+.pricing-card.featured .pricing-btn:hover {
+  background: white;
+  color: black;
+  box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+}
+
+@media (max-width: 1024px) {
+  .pricing-card.featured {
+    transform: scale(1);
+  }
+
+  .pricing-card.featured:hover {
+    transform: translateY(-10px);
+  }
+}
+
+/* Subscription Wall Styles */
+.subscription-wall {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 40px);
+  padding: 2rem;
+}
+
+.sub-card {
+  max-width: 500px;
+  width: 100%;
+  padding: 3rem;
+  border-radius: 2rem;
+  text-align: center;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.sub-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(139, 92, 246, 0.1);
+  color: #a78bfa;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.sub-card h2 {
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sub-desc {
+  color: #94a3b8;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+}
+
+.sub-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-bottom: 3rem;
+}
+
+.sub-price .currency {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.sub-price .value {
+  font-size: 4rem;
+  font-weight: 800;
+  color: white;
+}
+
+.sub-price .period {
+  font-size: 1.2rem;
+  color: #64748b;
+}
+
+.benefits-list {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-bottom: 3.5rem;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s;
+}
+
+.benefit-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(5px);
+}
+
+.benefit-icon {
+  color: #8b5cf6;
+  display: flex;
+  align-items: center;
+}
+
+.benefit-item span {
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  flex: 1;
+}
+
+.check-icon {
+  color: #10b981;
+}
+
+.subscribe-main-btn {
+  width: 100%;
+  padding: 1.2rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #8b5cf6, #d946ef);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+  transition: all 0.3s;
+}
+
+.subscribe-main-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(139, 92, 246, 0.4);
+}
+
+.subscribe-main-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.sub-footer-text {
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+@media (max-width: 640px) {
+  .sub-card {
+    padding: 2rem;
+  }
+
+  .sub-card h2 {
+    font-size: 1.8rem;
+  }
+
+  .sub-price .value {
+    font-size: 3rem;
+  }
+}
