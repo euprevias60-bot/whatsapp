@@ -369,5 +369,5 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Deployment Version: V2.3 - OpenRouter Active`);
+  console.log(`Deployment Version: V2.4 - OpenRouter Fallback Active`);
 });
