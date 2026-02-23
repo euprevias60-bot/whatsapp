@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
-import { Chrome, Check, ShieldCheck, UserCircle } from 'lucide-react';
+import { ShieldCheck, UserCircle, Check } from 'lucide-react';
 import '../index.css';
 
-function LoginPage({ onLogin }) {
+function LoginPage({ onLogin, t }) {
     const [error, setError] = useState(null);
 
     const handleSuccess = (credentialResponse) => {
         try {
             const decoded = jwtDecode(credentialResponse.credential);
-            console.log("Login Success:", decoded);
             onLogin({
                 id: decoded.sub,
                 name: decoded.name,
@@ -18,12 +17,11 @@ function LoginPage({ onLogin }) {
                 picture: decoded.picture
             });
         } catch (err) {
-            setError("Erro ao processar login com Google.");
+            setError(t('login_error') || "Erro ao processar login.");
         }
     };
 
     const handleMockLogin = (email = 'teste@exemplo.com', name = 'Usuário de Teste') => {
-        // Fallback para teste sem ter o Client ID configurado ainda
         onLogin({
             id: 'mock_' + (email === 'mateusolivercrew@gmail.com' ? 'admin' : 'user'),
             name: name,
@@ -43,13 +41,13 @@ function LoginPage({ onLogin }) {
                         <ShieldCheck size={32} color="#4f46e5" />
                     </div>
                     <h1>WhatsApp AI Agent</h1>
-                    <p className="subtitle">Faça login para gerenciar seus robôs personalizados</p>
+                    <p className="subtitle">{t('login_desc')}</p>
                 </div>
 
                 <div className="login-actions">
                     <GoogleLogin
                         onSuccess={handleSuccess}
-                        onError={() => setError("Falha na autenticação com Google.")}
+                        onError={() => setError(t('login_error') || "Falha na autenticação.")}
                         theme="filled_black"
                         shape="pill"
                         text="continue_with"
@@ -59,18 +57,18 @@ function LoginPage({ onLogin }) {
                     {error && <p className="error-text">{error}</p>}
 
                     <div className="divider">
-                        <span>ou</span>
+                        <span>{t('brand') === 'WhatsApp Premium Agent' ? 'or' : 'ou'}</span>
                     </div>
 
                     <div className="bypass-buttons">
                         <button className="dev-login-btn" onClick={() => handleMockLogin()}>
                             <UserCircle size={18} />
-                            Acesso Rápido (Demo)
+                            {t('demo_access')}
                         </button>
 
                         <button className="dev-login-btn admin-btn" onClick={() => handleMockLogin('mateusolivercrew@gmail.com', 'Administrador')}>
                             <ShieldCheck size={18} />
-                            Entrar como Admin (Local)
+                            {t('admin_login')}
                         </button>
                     </div>
                 </div>
@@ -78,11 +76,11 @@ function LoginPage({ onLogin }) {
                 <div className="features-mini">
                     <div className="feature-item">
                         <Check size={14} className="check-icon" />
-                        <span>Múltiplas Contas</span>
+                        <span>{t('benefit_1')}</span>
                     </div>
                     <div className="feature-item">
                         <Check size={14} className="check-icon" />
-                        <span>Privacidade Garantida</span>
+                        <span>{t('benefit_4')}</span>
                     </div>
                 </div>
             </div>

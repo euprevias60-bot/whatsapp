@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Save, Sparkles } from 'lucide-react';
 
-function ConfigPanel({ socket, userId }) {
+function ConfigPanel({ socket, userId, t }) {
     const [instruction, setInstruction] = useState('');
     const [saved, setSaved] = useState(false);
 
     useEffect(() => {
         if (!userId) return;
 
-        // Current config is sent by the server upon joining
         socket.on('config', (data) => {
             if (data && data.systemInstruction) {
                 setInstruction(data.systemInstruction);
@@ -32,32 +31,32 @@ function ConfigPanel({ socket, userId }) {
     return (
         <div className="config-view">
             <header className="page-header">
-                <h2>Persona da IA</h2>
-                <p>Defina a personalidade e as regras do seu robô</p>
+                <h2>{t('config_title')}</h2>
+                <p>{t('config_desc')}</p>
             </header>
 
             <div className="config-form card">
                 <div className="form-group">
                     <label className="flex-align">
                         <Sparkles size={16} className="margin-right" />
-                        Instrução do Sistema (Prompt)
+                        {t('ai_prompt_label')}
                     </label>
-                    <div className="helper-text">Descreva detalhadamente como a IA deve agir, o que ela deve vender ou como deve responder aos clientes.</div>
+                    <div className="helper-text">{t('feature_1_desc')}</div>
                     <textarea
                         value={instruction}
                         onChange={(e) => setInstruction(e.target.value)}
                         className="premium-textarea"
                         rows={12}
-                        placeholder="Ex: Você é um vendedor amigável de uma loja de roupas. Seu objetivo é ajudar o cliente a escolher o tamanho certo e informar que entregamos em todo o Brasil..."
+                        placeholder={t('ai_prompt_placeholder')}
                     />
                 </div>
 
                 <div className="form-actions">
                     <button onClick={handleSave} className="premium-button">
                         <Save size={18} />
-                        Salvar Configurações
+                        {t('save_config')}
                     </button>
-                    {saved && <div className="save-indicator bounce-in">✓ Configurações salvas com sucesso!</div>}
+                    {saved && <div className="save-indicator bounce-in">✓ {t('brand') === 'WhatsApp Premium Agent' ? 'Settings saved successfully!' : 'Configurações salvas com sucesso!'}</div>}
                 </div>
             </div>
         </div>

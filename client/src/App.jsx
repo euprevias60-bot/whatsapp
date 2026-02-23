@@ -8,27 +8,35 @@ import LoginPage from './components/LoginPage';
 import SubscriptionWall from './components/SubscriptionWall';
 import AdminPanel from './components/AdminPanel';
 import SupportWidget from './components/SupportWidget';
+import { translations } from './translations';
 import './index.css';
-import { LayoutDashboard, Settings, LogOut, MessageSquare, User, Shield } from 'lucide-react';
+import { LayoutDashboard, Settings, LogOut, MessageSquare, User, Shield, Globe } from 'lucide-react';
 
 // Connect to socket
-// Connect to socket - automatically detects if it should use localhost or the production URL
 const socket = io(window.location.hostname === 'localhost' ? 'http://localhost:3001' : window.location.origin);
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showLogin, setShowLogin] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
+
+  // Language State
+  const [lang, setLang] = useState(() => localStorage.getItem('app_lang') || null);
+
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
+  // Translation function
+  const t = (key) => {
+    const currentLang = lang || 'pt';
+    return translations[currentLang][key] || key;
+  };
+
   useEffect(() => {
     if (user && user.id) {
-      // Passa o email no join para o servidor salvar
       socket.emit('join', user.id, user.email);
-
       socket.on('config', (data) => {
         if (data.isSubscribed !== undefined) {
           setIsSubscribed(data.isSubscribed);
@@ -46,28 +54,54 @@ function App() {
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('user');
-    window.location.reload(); // Reset states
+    window.location.reload();
   };
 
-  // Substitute with YOUR real Google Client ID from Google Cloud Console
-  const GOOGLE_CLIENT_ID = "412723349811-io0r5hluk9id4qu0r3859p2k7hvun1vj.apps.googleusercontent.com";
+  const selectLanguage = (selectedLang) => {
+    setLang(selectedLang);
+    localStorage.setItem('app_lang', selectedLang);
+  };
 
+  const GOOGLE_CLIENT_ID = "412723349811-io0r5hluk9id4qu0r3859p2k7hvun1vj.apps.googleusercontent.com";
   const isAdmin = user?.email?.toLowerCase() === 'mateusolivercrew@gmail.com';
-  console.log("Current User Email:", user?.email, "Is Admin:", isAdmin);
 
   useEffect(() => {
-    if (isAdmin) {
-      setIsSubscribed(true);
-    }
+    if (isAdmin) setIsSubscribed(true);
   }, [isAdmin]);
+
+  // 1. Language Selection Screen
+  if (!lang) {
+    return (
+      <div className="language-selector-overlay">
+        <div className="language-card glass-effect">
+          <div className="lang-icon">
+            <Globe size={48} />
+          </div>
+          <h2>Select your language</h2>
+          <p>Selecione seu idioma para continuar</p>
+
+          <div className="lang-buttons">
+            <button className="lang-btn" onClick={() => selectLanguage('pt')}>
+              <span className="flag">🇧🇷</span>
+              Português
+            </button>
+            <button className="lang-btn" onClick={() => selectLanguage('en')}>
+              <span className="flag">🇺🇸</span>
+              English
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     if (!showLogin) {
-      return <LandingPage onStart={() => setShowLogin(true)} />;
+      return <LandingPage onStart={() => setShowLogin(true)} t={t} />;
     }
     return (
       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-        <LoginPage onLogin={handleLogin} />
+        <LoginPage onLogin={handleLogin} t={t} />
       </GoogleOAuthProvider>
     );
   }
@@ -76,10 +110,10 @@ function App() {
     <div className="app-container">
       <nav className="sidebar-modern glass-effect">
         <div className="sidebar-brand">
-          <div className="brand-logo">AI</div>
+          <div className="logo-icon">AI</div>
           <div className="brand-text">
-            <span>WhatsApp</span>
-            <small>Premium Agent</small>
+            <span>{lang === 'pt' ? 'WhatsApp' : 'WhatsApp'}</span>
+            <small>{t('brand')}</small>
           </div>
         </div>
 
@@ -92,7 +126,7 @@ function App() {
             <div className="profile-meta">
               <h4>{user.name}</h4>
               <span className={`plan-badge ${isSubscribed || isAdmin ? 'premium' : 'free'}`}>
-                {isSubscribed || isAdmin ? 'Plano Pro AI' : 'Plano Free'}
+                {isSubscribed || isAdmin ? t('pro_plan') : t('free_plan')}
               </span>
             </div>
           </div>
@@ -104,7 +138,7 @@ function App() {
             onClick={() => setActiveTab('dashboard')}
           >
             <div className="nav-icon"><LayoutDashboard size={20} /></div>
-            <span>Dashboard</span>
+            <span>{t('dashboard')}</span>
           </button>
 
           <button
@@ -112,7 +146,7 @@ function App() {
             onClick={() => setActiveTab('config')}
           >
             <div className="nav-icon"><Settings size={20} /></div>
-            <span>Configuração</span>
+            <span>{t('config')}</span>
           </button>
 
           {isAdmin && (
@@ -121,7 +155,7 @@ function App() {
               onClick={() => setActiveTab('admin')}
             >
               <div className="nav-icon"><Shield size={20} /></div>
-              <span>Admin</span>
+              <span>{t('admin')}</span>
             </button>
           )}
         </div>
@@ -129,7 +163,7 @@ function App() {
         <div className="sidebar-bottom">
           <button className="logout-btn" onClick={handleLogout}>
             <LogOut size={18} />
-            <span>Sair do Sistema</span>
+            <span>{t('logout')}</span>
           </button>
         </div>
       </nav>
@@ -138,18 +172,17 @@ function App() {
         <div className="content-container">
           {activeTab === 'dashboard' && (
             (isSubscribed || isAdmin) ? (
-              <QRCodeView socket={socket} userId={user.id} />
+              <QRCodeView socket={socket} userId={user.id} t={t} />
             ) : (
-              <SubscriptionWall userId={user.id} />
+              <SubscriptionWall userId={user.id} t={t} />
             )
           )}
-          {activeTab === 'config' && <ConfigPanel socket={socket} userId={user.id} />}
-          {activeTab === 'admin' && isAdmin && <AdminPanel socket={socket} userId={user.id} />}
+          {activeTab === 'config' && <ConfigPanel socket={socket} userId={user.id} t={t} />}
+          {activeTab === 'admin' && isAdmin && <AdminPanel socket={socket} userId={user.id} t={t} />}
         </div>
       </main>
 
-      {/* Botão de Suporte - Oculto no painel admin para não poluir */}
-      {activeTab !== 'admin' && <SupportWidget socket={socket} user={user} />}
+      {activeTab !== 'admin' && <SupportWidget socket={socket} user={user} t={t} />}
     </div>
   );
 }

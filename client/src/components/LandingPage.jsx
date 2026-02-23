@@ -1,6 +1,6 @@
 import { ChevronRight, MessageSquare, Zap, Shield, Smartphone, ArrowRight, Bot } from 'lucide-react';
 
-function LandingPage({ onStart }) {
+function LandingPage({ onStart, t }) {
     return (
         <div className="landing-container">
             {/* Animated Background */}
@@ -13,23 +13,23 @@ function LandingPage({ onStart }) {
             <nav className="landing-nav">
                 <div className="logo">
                     <div className="logo-icon">AI</div>
-                    <span>WhatsApp Bot</span>
+                    <span>{t('brand')}</span>
                 </div>
-                <button className="nav-btn" onClick={onStart}>Entrar</button>
+                <button className="nav-btn" onClick={onStart}>{t('login')}</button>
             </nav>
 
             <main className="landing-hero">
                 <div className="hero-content">
                     <div className="badge">
                         <Zap size={14} />
-                        <span>Nova era de atendimento</span>
+                        <span>{t('hero_badge')}</span>
                     </div>
-                    <h1>Transforme seu WhatsApp em uma <span>Máquina de Vendas</span> com IA</h1>
-                    <p>Atenda seus clientes 24/7 com inteligência artificial de última geração. Automação inteligente que parece humana.</p>
+                    <h1>{t('hero_title_1')}<span>{t('hero_title_2')}</span>{t('hero_title_3')}</h1>
+                    <p>{t('hero_desc')}</p>
 
                     <div className="hero-actions">
                         <button className="primary-landing-btn" onClick={onStart}>
-                            Começar Agora Gratuitamente
+                            {t('get_started')}
                             <ChevronRight size={20} />
                         </button>
                     </div>
@@ -37,17 +37,17 @@ function LandingPage({ onStart }) {
                     <div className="hero-stats">
                         <div className="stat-item">
                             <strong>+10k</strong>
-                            <span>Mensagens/dia</span>
+                            <span>{t('stats_msg')}</span>
                         </div>
                         <div className="divider-v"></div>
                         <div className="stat-item">
                             <strong>99%</strong>
-                            <span>Satisfação</span>
+                            <span>{t('stats_satisfaction')}</span>
                         </div>
                         <div className="divider-v"></div>
                         <div className="stat-item">
                             <strong>24/7</strong>
-                            <span>Ativo</span>
+                            <span>{t('stats_active')}</span>
                         </div>
                     </div>
                 </div>
@@ -56,22 +56,22 @@ function LandingPage({ onStart }) {
                     <div className="floating-card chat-card">
                         <div className="chat-header">
                             <div className="chat-avatar"></div>
-                            <span>Cliente</span>
+                            <span>{t('bot_online')}</span>
                         </div>
                         <div className="chat-bubble">Olá, vocês têm o modelo X disponível?</div>
                         <div className="chat-bubble bot">Sim! Temos em 3 cores. Deseja ver as fotos? ✨</div>
                     </div>
                     <div className="floating-card status-card-mini">
                         <div className="pulse-dot"></div>
-                        <span>Bot Online</span>
+                        <span>{t('bot_online')}</span>
                     </div>
                 </div>
             </main>
 
             <section className="features-section">
                 <div className="section-header">
-                    <h2>Por que escolher nosso Bot?</h2>
-                    <p>Tecnologia avançada para resultados extraordinários</p>
+                    <h2>{t('features_title')}</h2>
+                    <p>{t('features_subtitle')}</p>
                 </div>
 
                 <div className="features-grid">
@@ -79,62 +79,62 @@ function LandingPage({ onStart }) {
                         <div className="f-icon purple">
                             <Bot size={24} />
                         </div>
-                        <h3>Persona Customizável</h3>
-                        <p>Defina exatamente como sua IA deve falar e se comportar com seus clientes.</p>
+                        <h3>{t('feature_1_title')}</h3>
+                        <p>{t('feature_1_desc')}</p>
                     </div>
 
                     <div className="feature-card">
                         <div className="f-icon blue">
                             <Shield size={24} />
                         </div>
-                        <h3>Takeover Humano</h3>
-                        <p>O bot pausa automaticamente quando você envia uma mensagem manual.</p>
+                        <h3>{t('feature_2_title')}</h3>
+                        <p>{t('feature_2_desc')}</p>
                     </div>
 
                     <div className="feature-card">
                         <div className="f-icon green">
                             <Smartphone size={24} />
                         </div>
-                        <h3>Integração Simples</h3>
-                        <p>Escaneie o QR Code e em menos de 1 minuto seu bot estará pronto para falar.</p>
+                        <h3>{t('feature_3_title')}</h3>
+                        <p>{t('feature_3_desc')}</p>
                     </div>
 
                     <div className="feature-card">
                         <div className="f-icon orange">
                             <MessageSquare size={24} />
                         </div>
-                        <h3>Histórico Inteligente</h3>
-                        <p>A IA entende o contexto da conversa para dar respostas precisas.</p>
+                        <h3>{t('feature_4_title')}</h3>
+                        <p>{t('feature_4_desc')}</p>
                     </div>
                 </div>
             </section>
 
             <section className="pricing-section">
                 <div className="section-header">
-                    <h2>Planos e Preços</h2>
-                    <p>Escolha o plano ideal para o seu negócio crescer</p>
+                    <h2>{t('pricing_title')}</h2>
+                    <p>{t('pricing_subtitle')}</p>
                 </div>
 
                 <div className="pricing-grid">
                     <div className="pricing-card featured">
-                        <div className="featured-badge">Plano Único</div>
+                        <div className="featured-badge">{t('pricing_featured')}</div>
                         <div className="p-header">
-                            <h3>Acesso Pro AI</h3>
-                            <div className="price">R$ 59<span>,90/mês</span></div>
+                            <h3>{t('pricing_pro_title')}</h3>
+                            <div className="price">{t('pricing_pro_price')}<span>{t('pricing_pro_period')}</span></div>
                         </div>
                         <ul className="p-features">
-                            <li><CheckCircle size={16} /> WhatsApp Ilimitado</li>
-                            <li><CheckCircle size={16} /> IA Gemini 2.0 Flash</li>
-                            <li><CheckCircle size={16} /> Human Takeover (Pausa Automática)</li>
-                            <li><CheckCircle size={16} /> Suporte Prioritário</li>
+                            <li><CheckCircle size={16} /> {t('benefit_1')}</li>
+                            <li><CheckCircle size={16} /> {t('benefit_2')}</li>
+                            <li><CheckCircle size={16} /> {t('benefit_3')}</li>
+                            <li><CheckCircle size={16} /> {t('benefit_4')}</li>
                         </ul>
-                        <button className="pricing-btn" onClick={onStart}>Assinar Agora</button>
+                        <button className="pricing-btn" onClick={onStart}>{t('subscribe_now')}</button>
                     </div>
                 </div>
             </section>
 
             <footer className="landing-footer">
-                <p>&copy; 2024 WhatsApp AI Agent. O futuro do atendimento automatizado.</p>
+                <p>{t('footer_text')}</p>
             </footer>
         </div>
     );

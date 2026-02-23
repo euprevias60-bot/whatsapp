@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { MessageCircle, X, Send } from 'lucide-react';
 
-function SupportWidget({ socket, user }) {
+function SupportWidget({ socket, user, t }) {
     const [isOpen, setIsOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [sent, setSent] = useState(false);
@@ -28,7 +28,7 @@ function SupportWidget({ socket, user }) {
                     <div className="support-header">
                         <div className="flex-align gap-2">
                             <div className="support-dot"></div>
-                            <span>Suporte ao Cliente</span>
+                            <span>{t('support_title')}</span>
                         </div>
                         <button onClick={() => setIsOpen(false)} className="close-btn">
                             <X size={18} />
@@ -38,21 +38,21 @@ function SupportWidget({ socket, user }) {
                     <div className="support-body">
                         {sent ? (
                             <div className="support-success">
-                                <p>Mensagem enviada com sucesso! O administrador Mateus entrará em contato em breve.</p>
+                                <p>{t('brand') === 'WhatsApp Premium Agent' ? 'Message sent successfully! Admin will contact you soon.' : 'Mensagem enviada com sucesso! O administrador Mateus entrará em contato em breve.'}</p>
                             </div>
                         ) : (
                             <>
-                                <p>Olá! Como podemos ajudar você hoje? Deixe sua dúvida abaixo.</p>
+                                <p>{t('support_placeholder')}</p>
                                 <form onSubmit={handleSubmit} className="support-form">
                                     <textarea
-                                        placeholder="Digite sua mensagem aqui..."
+                                        placeholder={t('support_placeholder')}
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
                                         required
                                     />
                                     <button type="submit" className="btn-send-support">
                                         <Send size={16} />
-                                        Enviar Mensagem
+                                        {t('support_send')}
                                     </button>
                                 </form>
                             </>
