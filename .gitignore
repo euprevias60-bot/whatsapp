@@ -1,0 +1,26 @@
+# Dependências
+node_modules/
+**/node_modules/
+client/dist/
+dist/
+
+# Configurações Sensíveis
+.env
+**/ .env
+.env.local
+database.json
+**/database.json
+
+# Sessões e Cache de WhatsApp
+.wwebjs_auth/
+**/.wwebjs_auth/
+.wwebjs_cache/
+**/.wwebjs_cache/
+session*.json
+
+# Logs e Sistema
+logs/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
