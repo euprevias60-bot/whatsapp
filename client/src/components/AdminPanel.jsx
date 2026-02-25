@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { Users, Calendar, ShieldCheck, Mail, Clock, MessageSquare, Send } from 'lucide-react';
+import { Users, Calendar, ShieldCheck, Mail, Clock, MessageSquare, Send, Crown, ShieldOff } from 'lucide-react';
 
 function AdminPanel({ socket, userId, t }) {
     const [users, setUsers] = useState({});
@@ -22,6 +21,12 @@ function AdminPanel({ socket, userId, t }) {
             socket.off('newSupportMessage');
         };
     }, [socket, userId]);
+
+    const handleToggleSubscription = (targetUserId) => {
+        if (window.confirm(t('brand') === 'WhatsApp Premium Agent' ? 'Toggle subscription status for this user?' : 'Alterar status de assinatura deste usuário?')) {
+            socket.emit('toggleSubscription', { adminId: userId, targetUserId });
+        }
+    };
 
     if (loading) {
         return <div className="admin-container"><div className="loading-state">{t('brand') === 'WhatsApp Premium Agent' ? 'Loading admin data...' : 'Carregando dados da administração...'}</div></div>;
@@ -68,6 +73,7 @@ function AdminPanel({ socket, userId, t }) {
                                     <th>{t('brand') === 'WhatsApp Premium Agent' ? 'Registered' : 'Cadastro'}</th>
                                     <th>Status</th>
                                     <th>{t('brand') === 'WhatsApp Premium Agent' ? 'Expires' : 'Expira em'}</th>
+                                    <th>{t('brand') === 'WhatsApp Premium Agent' ? 'Actions' : 'Ações'}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -78,6 +84,15 @@ function AdminPanel({ socket, userId, t }) {
                                         <td>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '---'}</td>
                                         <td><span className={`status-pill ${u.isSubscribed ? 'active' : 'inactive'}`}>{u.isSubscribed ? t('pro_plan') : t('free_plan')}</span></td>
                                         <td>{u.subscriptionExpiry ? new Date(u.subscriptionExpiry).toLocaleDateString() : '---'}</td>
+                                        <td>
+                                            <button
+                                                className={`action-btn-circle ${u.isSubscribed ? 'btn-deactivate' : 'btn-activate'}`}
+                                                onClick={() => handleToggleSubscription(id)}
+                                                title={u.isSubscribed ? 'Deactivate' : 'Activate'}
+                                            >
+                                                {u.isSubscribed ? <ShieldOff size={16} /> : <Crown size={16} />}
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

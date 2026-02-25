@@ -314,6 +314,25 @@ io.on('connection', async (socket) => {
     }
   });
 
+  socket.on('toggleSubscription', async (data) => {
+    const { adminId, targetUserId } = data;
+    const adminConfig = await getUserConfig(adminId);
+
+    if (adminConfig.email && adminConfig.email.toLowerCase() === 'mateusolivercrew@gmail.com') {
+      const userConfig = await getUserConfig(targetUserId);
+      const newStatus = !userConfig.isSubscribed;
+
+      await updateUserConfig(targetUserId, {
+        isSubscribed: newStatus,
+        subscriptionExpiry: newStatus ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : null
+      });
+
+      const users = await getAllUsers();
+      socket.emit('allUsersList', users);
+      console.log(`Admin ${adminId} toggled subscription for ${targetUserId} to ${newStatus}`);
+    }
+  });
+
   socket.on('sendSupportMessage', async (data) => {
     const { userId, userEmail, message } = data;
     await addSupportMessage(userId, userEmail, message);
@@ -405,7 +424,7 @@ if (process.env.NODE_ENV === 'production' || process.env.SERVE_STATIC === 'true'
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`-----------------------------------------`);
-  console.log(`DEPLOYMENT VERSION: V4.0 (GEMINI NATIVE)`);
+  console.log(`DEPLOYMENT VERSION: V4.5 (MANUAL ACTIVATION)`);
   console.log(`DEPLOY TIME: ${new Date().toLocaleString()}`);
   console.log(`-----------------------------------------`);
 });
