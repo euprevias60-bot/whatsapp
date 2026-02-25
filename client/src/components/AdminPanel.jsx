@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Users, Calendar, ShieldCheck, Mail, Clock, MessageSquare, Send, Crown, ShieldOff } from 'lucide-react';
 
 function AdminPanel({ socket, userId, t }) {
