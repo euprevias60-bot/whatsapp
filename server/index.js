@@ -136,7 +136,10 @@ async function getOrCreateSession(userId, io) {
   aiAgent.updateInstruction(config.systemInstruction);
 
   const client = new Client({
-    authStrategy: new LocalAuth({ clientId: userId }),
+    authStrategy: new LocalAuth({
+      clientId: userId,
+      dataPath: process.env.NODE_ENV === 'production' ? '/app/data/auth' : './.wwebjs_auth'
+    }),
     puppeteer: {
       headless: true,
       args: [
