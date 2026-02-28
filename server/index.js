@@ -139,7 +139,16 @@ async function getOrCreateSession(userId, io) {
     authStrategy: new LocalAuth({ clientId: userId }),
     puppeteer: {
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process', // Importante para economia de memória no Railway
+        '--disable-gpu'
+      ]
     }
   });
 
@@ -289,14 +298,22 @@ io.on('connection', async (socket) => {
     console.log(`User ${userId} subscription status: ${subscribed}`);
 
     if (subscribed) {
-      const session = await getOrCreateSession(userId, io);
-      socket.emit('status', session.status);
-      socket.emit('paused_status', session.paused);
-      if (session.qr) socket.emit('qr', session.qr);
-      socket.emit('config', {
-        systemInstruction: session.aiAgent.systemInstruction,
-        isSubscribed: true
-      });
+      const session = sessions.get(userId);
+      if (session) {
+        socket.emit('status', session.status);
+        socket.emit('paused_status', session.paused);
+        if (session.qr) socket.emit('qr', session.qr);
+        socket.emit('config', {
+          systemInstruction: session.aiAgent.systemInstruction,
+          isSubscribed: true
+        });
+      } else {
+        socket.emit('status', 'disconnected');
+        socket.emit('config', {
+          systemInstruction: userConfig.systemInstruction,
+          isSubscribed: true
+        });
+      }
     } else {
       socket.emit('status', 'disconnected');
       socket.emit('config', {
@@ -355,16 +372,23 @@ io.on('connection', async (socket) => {
     if (!userId || !systemInstruction) return;
 
     console.log(`Updating config for user ${userId}`);
-    const session = await getOrCreateSession(userId, io);
-    session.aiAgent.updateInstruction(systemInstruction);
+    const session = sessions.get(userId);
+    if (session) {
+      session.aiAgent.updateInstruction(systemInstruction);
+    }
     await updateUserConfig(userId, { systemInstruction });
   });
 
   socket.on('requestStatus', async (userId) => {
     if (!userId) return;
-    const session = await getOrCreateSession(userId, io);
-    socket.emit('status', session.status);
-    socket.emit('paused_status', session.paused);
+    const session = sessions.get(userId);
+    if (session) {
+      socket.emit('status', session.status);
+      socket.emit('paused_status', session.paused);
+      if (session.qr) socket.emit('qr', session.qr);
+    } else {
+      socket.emit('status', 'disconnected');
+    }
   });
 
   socket.on('pause_bot', async (userId) => {
